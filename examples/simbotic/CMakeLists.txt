@@ -6,6 +6,9 @@
 #     # ...
 #     ADD_HERE_YOUR_FILEn.cpp)
 
+set(USER_CODE_FILES 
+   simbotic-openpose.cpp)
+
 foreach(USER_CODE_FILE ${USER_CODE_FILES})
 
   get_filename_component(SOURCE_NAME ${USER_CODE_FILE} NAME_WE)

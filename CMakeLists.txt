@@ -3,7 +3,8 @@ set(OpenPose_VERSION_MAJOR 1)
 set(OpenPose_VERSION_MINOR 4)
 set(OpenPose_VERSION_PATCH 0)
 set(OpenPose_VERSION ${OpenPose_VERSION_MAJOR}.${OpenPose_VERSION_MINOR}.${OpenPose_VERSION_PATCH})
-
+set(OSC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/oscpack)
+message(${OSC_INCLUDE_DIRS})
 
 ### OS-DEPENDENT FLAGS
 set(CMAKE_MACOSX_RPATH 1)
@@ -524,6 +525,7 @@ if (WIN32)
   find_library(GFLAGS_LIBRARY_DEBUG gflagsd HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
   find_library(GLOG_LIBRARY_RELEASE glog HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
   find_library(GLOG_LIBRARY_DEBUG glogd HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
+  find_library(OSCPACK_LIBRARY_RELEASE oscpack HINTS ${FIND_LIB_PREFIX}/oscpack)
 
   # If OpenPose builds it
   if (BUILD_CAFFE)
@@ -789,8 +791,9 @@ include_directories(
   ${Protobuf_INCLUDE_DIRS}
   ${GFLAGS_INCLUDE_DIR}
   ${GLOG_INCLUDE_DIR}
-  ${OpenCV_INCLUDE_DIRS})
-
+  ${OpenCV_INCLUDE_DIRS}
+  ${OSC_INCLUDE_DIRS})
+# Here we go
 if (USE_ASIO)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/asio/include/)
   # OpenPose flags
