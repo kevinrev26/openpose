@@ -52,7 +52,7 @@ public:
         const auto key = (char)cv::waitKey(1);
         return (key == 27);
     }
-    void printKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, OSCSender sender)
+    void printKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, OSCSender &sender)
     {
         // Example: How to use the pose keypoints
         if (datumsPtr != nullptr && !datumsPtr->empty())
@@ -72,12 +72,12 @@ public:
                         valueToPrint += std::to_string(   poseKeypoints[{person, bodyPart, xyscore}]   ) + " ";
                     }
                     op::log(valueToPrint);
-                    /*char buffer[OUTPUT_BUFFER_SIZE];
+                    char buffer[OUTPUT_BUFFER_SIZE];
                     osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
                     p << osc::BeginMessage("/openpose")
                     << valueToPrint.c_str()
-                    << osc::EndMessage;*/
-                    //sender.sendMessage(p);
+                    << osc::EndMessage;
+                    sender.sendMessage(p);
                 }
             }
             op::log(" ");
@@ -213,7 +213,7 @@ void configureWrapper(op::Wrapper& opWrapper)
     }
 }
 
-int tutorialApiCpp(const OSCSender sender)
+int tutorialApiCpp(OSCSender &sender)
 {
     try
     {
