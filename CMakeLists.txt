@@ -4,7 +4,6 @@ set(OpenPose_VERSION_MINOR 4)
 set(OpenPose_VERSION_PATCH 0)
 set(OpenPose_VERSION ${OpenPose_VERSION_MAJOR}.${OpenPose_VERSION_MINOR}.${OpenPose_VERSION_PATCH})
 set(OSC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/oscpack)
-message(${OSC_INCLUDE_DIRS})
 
 ### OS-DEPENDENT FLAGS
 set(CMAKE_MACOSX_RPATH 1)
@@ -379,6 +378,9 @@ else (${WITH_EIGEN} MATCHES "NONE")
   endif (${WITH_EIGEN} MATCHES "BUILD")
 endif (${WITH_EIGEN} MATCHES "NONE")
 
+# Add lib oscpack?
+message(STATUS ${OSC_INCLUDE_DIRS})
+
 if (UNIX OR APPLE)
   if (${GPU_MODE} MATCHES "CUDA")
     include(cmake/Cuda.cmake)
@@ -525,8 +527,6 @@ if (WIN32)
   find_library(GFLAGS_LIBRARY_DEBUG gflagsd HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
   find_library(GLOG_LIBRARY_RELEASE glog HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
   find_library(GLOG_LIBRARY_DEBUG glogd HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
-  find_library(OSCPACK_LIBRARY_RELEASE oscpack HINTS ${FIND_LIB_PREFIX}/oscpack)
-
   # If OpenPose builds it
   if (BUILD_CAFFE)
     unset(Caffe_INCLUDE_DIRS CACHE)
@@ -857,7 +857,11 @@ endif (WIN32)
 
 
 ### COLLECT ALL 3RD-PARTY LIBRARIES TO BE LINKED AGAINST
-set(OpenPose_3rdparty_libraries ${OpenCV_LIBS} ${GLOG_LIBRARY})
+find_library(OSCPACK_LIBRARY oscpack HINTS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/oscpack)
+message(${OSCPACK_LIBRARY})
+set(OpenPose_3rdparty_libraries ${OpenCV_LIBS} ${GLOG_LIBRARY} ${OSCPACK_LIBRARY})
+
+# maybe above?
 if (UNIX OR APPLE)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${GLOG_LIBRARY})
 elseif (WIN32)
@@ -904,8 +908,10 @@ if (UNIX OR APPLE)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} pthread)
 endif (UNIX OR APPLE)
 
-set(examples_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${GFLAGS_LIBRARY})
+#set(examples_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${GFLAGS_LIBRARY})
 
+
+# OSCPack library
 
 ### ADD SUBDIRECTORIES
 if (Caffe_FOUND)

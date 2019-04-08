@@ -7,11 +7,31 @@
 #include <openpose/flags.hpp>
 // OpenPose dependencies
 #include <openpose/headers.hpp>
+#include "osc/OscOutboundPacketStream.h"
+#include "ip/UdpSocket.h"
 
+#define ADDRESS "127.0.0.1"
+#define PORT 5555
+#define OUTPUT_BUFFER_SIZE 1024
 // Custom OpenPose flags
 // Display
 DEFINE_bool(no_display,                 false,
     "Enable to disable the visual display.");
+
+class OSCSender
+{
+private:
+    UdpTransmitSocket transmitSocket;
+public:
+    OSCSender(): transmitSocket( IpEndpointName( ADDRESS, PORT ) ){
+        std::cout << "New OscSender object";
+    };
+
+    void sendMessage(osc::OutboundPacketStream package){
+        transmitSocket.Send(package.Data(), package.Size());
+    }
+};
+
 
 // This worker will just read and return all the jpg files in a directory
 class UserOutputClass
@@ -32,7 +52,7 @@ public:
         const auto key = (char)cv::waitKey(1);
         return (key == 27);
     }
-    void printKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr)
+    void printKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, OSCSender sender)
     {
         // Example: How to use the pose keypoints
         if (datumsPtr != nullptr && !datumsPtr->empty())
@@ -52,6 +72,12 @@ public:
                         valueToPrint += std::to_string(   poseKeypoints[{person, bodyPart, xyscore}]   ) + " ";
                     }
                     op::log(valueToPrint);
+                    /*char buffer[OUTPUT_BUFFER_SIZE];
+                    osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
+                    p << osc::BeginMessage("/openpose")
+                    << valueToPrint.c_str()
+                    << osc::EndMessage;*/
+                    //sender.sendMessage(p);
                 }
             }
             op::log(" ");
@@ -187,7 +213,7 @@ void configureWrapper(op::Wrapper& opWrapper)
     }
 }
 
-int tutorialApiCpp()
+int tutorialApiCpp(const OSCSender sender)
 {
     try
     {
@@ -214,7 +240,7 @@ int tutorialApiCpp()
             {
                 if (!FLAGS_no_display)
                     userWantsToExit = userOutputClass.display(datumProcessed);;
-                userOutputClass.printKeypoints(datumProcessed);
+                userOutputClass.printKeypoints(datumProcessed, sender);
             }
             // If OpenPose finished reading images
             else if (!opWrapper.isRunning())
@@ -242,8 +268,10 @@ int tutorialApiCpp()
 int main(int argc, char *argv[])
 {
     // Parsing command line flags
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
+    gflags::ParseCommandLineFlags(&argc, &argv, true);    
+    
+    OSCSender sender;
 
-    // Running tutorialApiCpp
-    return tutorialApiCpp();
+    //Running tutorialApiCpp
+    return tutorialApiCpp(sender);
 }
