@@ -4,6 +4,7 @@
 
 // Command-line user intraface
 #define OPENPOSE_FLAGS_DISABLE_DISPLAY
+#include <iterator>
 #include <openpose/flags.hpp>
 // OpenPose dependencies
 #include <openpose/headers.hpp>
@@ -32,7 +33,6 @@ public:
     }
 };
 
-
 // This worker will just read and return all the jpg files in a directory
 class UserOutputClass
 {
@@ -44,7 +44,7 @@ public:
             // datumPtr->poseKeypoints: Array<float> with the estimated pose
         if (datumsPtr != nullptr && !datumsPtr->empty())
         {
-            cv::imshow(OPEN_POSE_NAME_AND_VERSION + " - Tutorial C++ API", datumsPtr->at(0)->cvOutputData);
+            cv::imshow(OPEN_POSE_NAME_AND_VERSION + " - UE4 - OpenPose - GStreamer", datumsPtr->at(0)->cvOutputData);
             // Display image and sleeps at least 1 ms (it usually sleeps ~5-10 msec to display the image)
         }
         else
@@ -63,6 +63,7 @@ public:
             op::log("Person pose keypoints:");
             for (auto person = 0 ; person < poseKeypoints.getSize(0) ; person++)
             {
+                std::string ind[25];
                 op::log("Person " + std::to_string(person) + " (x, y, score):");
                 for (auto bodyPart = 0 ; bodyPart < poseKeypoints.getSize(1) ; bodyPart++)
                 {
@@ -71,14 +72,21 @@ public:
                     {
                         valueToPrint += std::to_string(   poseKeypoints[{person, bodyPart, xyscore}]   ) + " ";
                     }
-                    op::log(valueToPrint);
-                    char buffer[OUTPUT_BUFFER_SIZE];
-                    osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
-                    p << osc::BeginMessage("/openpose")
-                    << valueToPrint.c_str()
-                    << osc::EndMessage;
-                    sender.sendMessage(p);
+                    op::log( "Part: " + std::to_string(bodyPart) + " - " + valueToPrint);
+                    ind[bodyPart] = valueToPrint;
                 }
+
+                osc::Blob msg;
+                msg.data = ind[0].c_str();
+                msg.size = sizeof(ind[0]);
+
+                char buffer[OUTPUT_BUFFER_SIZE];
+                osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
+                p << osc::BeginMessage("/openpose")
+                  << msg
+                  << osc::EndMessage;
+                
+                sender.sendMessage(p);
             }
             op::log(" ");
             // Alternative: just getting std::string equivalent
