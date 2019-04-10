@@ -6,4 +6,4 @@
 	url = https://github.com/pybind/pybind11.git
 [submodule "3rdparty/oscpack"]
 	path = 3rdparty/oscpack
-	url = git@github.com:MariadeAnton/oscpack.git
+	url = https://github.com/MariadeAnton/oscpack.git
